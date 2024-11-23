@@ -20,6 +20,43 @@ export const supabase = createClient<Database>(
   }
 );
 
+export const session$ = observable<any>(null);
+export const user$ = observable<any>(null);
+
+supabase.auth.getSession().then(({ data: { session } }) => {
+  session$.set(session);
+  user$.set(session?.user ?? null);
+});
+
+// Auth functions
+export const signInWithEmail = async (email: string, password: string) => {
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+  return { error };
+};
+
+export const signUpWithEmail = async (email: string, password: string) => {
+  const { data: { session }, error } = await supabase.auth.signUp({
+    email,
+    password,
+  });
+  return { session, error };
+};
+
+export const signOut = async () => {
+  const { error } = await supabase.auth.signOut();
+  return { error };
+};
+
+
+// Auth state change handler
+supabase.auth.onAuthStateChange((_event, session) => {
+  session$.set(session);
+  user$.set(session?.user ?? null);
+});
+
 // Provide a function to generate ids locally
 const generateId = () => uuidv4();
 
@@ -40,44 +77,31 @@ const customSynced = configureSynced(syncedSupabase, {
   fieldDeleted: 'deleted',
 });
 
-// Add a helper to get the current user's ID
-export const getCurrentUserId = async () => {
-  const { data: { user } } = await supabase.auth.getUser();
-  return user?.id;
-};
-
 export const todos$ = observable(
   customSynced({
     supabase,
     collection: 'todos',
     select: (from) =>
-      from
-        .select('id,counter,text,done,created_at,updated_at,deleted,user_id')
-        .eq('user_id', await getCurrentUserId()),  // Filter by current user
+      from.select('id,counter,text,done,created_at,updated_at,deleted'),
     actions: ['read', 'create', 'update', 'delete'],
     realtime: true,
+    // Persist data and pending changes locally
     persist: {
       name: 'todos',
-      retrySync: true,
+      retrySync: true, // Persist pending changes and retry
     },
     retry: {
-      infinite: true,
+      infinite: true, // Retry changes with exponential backoff
     },
   })
 );
 
-export async function addTodo(text: string) {
-  const userId = await getCurrentUserId();
-  if (!userId) return; // Don't create todo if user isn't authenticated
-
+export function addTodo(text: string) {
   const id = generateId();
+  // Add keyed by id to the todos$ observable to trigger a create in Supabase
   todos$[id].assign({
     id,
     text,
-    user_id: userId, // Include the user_id when creating a todo
-    done: false,
-    counter: 0,
-    deleted: false,
   });
 }
 

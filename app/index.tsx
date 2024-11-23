@@ -1,3 +1,4 @@
+import { signInWithEmail, signUpWithEmail } from "@/utils/SupaLegend";
 import { supabase } from "@/utils/SupaLegend";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -21,30 +22,49 @@ export default function Auth() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function signInWithEmail() {
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email,
-      password: password,
-    });
+  //   async function signInWithEmail() {
+  //     setLoading(true);
+  //     const { error } = await supabase.auth.signInWithPassword({
+  //       email: email,
+  //       password: password,
+  //     });
 
+  //     if (error) Alert.alert(error.message);
+  //     setLoading(false);
+  //     router.push("/todo");
+  //   }
+  async function handleSignIn() {
+    setLoading(true);
+    const { error } = await signInWithEmail(email, password);
     if (error) Alert.alert(error.message);
+    else router.push("/todo");
     setLoading(false);
-    router.push("/todo");
   }
 
-  async function signUpWithEmail() {
-    setLoading(true);
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.signUp({
-      email: email,
-      password: password,
-    });
+  //   async function signUpWithEmail() {
+  //     setLoading(true);
+  //     const {
+  //       data: { session },
+  //       error,
+  //     } = await supabase.auth.signUp({
+  //       email: email,
+  //       password: password,
+  //     });
 
+  //     if (error) Alert.alert(error.message);
+  //     if (!session) {
+  //       Alert.alert("Please check your inbox for email verification!");
+  //     } else {
+  //       router.push("/todo");
+  //     }
+  //     setLoading(false);
+  //   }
+
+  async function handleSignUp() {
+    setLoading(true);
+    const { session, error } = await signUpWithEmail(email, password);
     if (error) Alert.alert(error.message);
-    if (!session) {
+    else if (!session) {
       Alert.alert("Please check your inbox for email verification!");
     } else {
       router.push("/todo");
@@ -75,14 +95,14 @@ export default function Auth() {
         <Button
           title="Sign in"
           disabled={loading}
-          onPress={() => signInWithEmail()}
+          onPress={() => handleSignIn()}
         />
       </View>
       <View style={styles.verticallySpaced}>
         <Button
           title="Sign up"
           disabled={loading}
-          onPress={() => signUpWithEmail()}
+          onPress={() => handleSignUp()}
         />
       </View>
     </View>
