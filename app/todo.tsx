@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+  Button,
   FlatList,
   StyleSheet,
   Text,
@@ -9,8 +10,15 @@ import {
 } from "react-native";
 
 import { observer } from "@legendapp/state/react";
-import { addTodo, todos$ as _todos$, toggleDone } from "@/utils/SupaLegend";
+import {
+  addTodo,
+  todos$ as _todos$,
+  toggleDone,
+  user$,
+  signOut,
+} from "@/utils/SupaLegend";
 import { Tables } from "@/utils/database.types";
+import { useRouter } from "expo-router";
 
 // Emojis to decorate each todo.
 const NOT_DONE_ICON = String.fromCodePoint(0x1f7e0);
@@ -84,12 +92,25 @@ const ClearTodos = () => {
 };
 
 const TodoPage = observer(() => {
+  const user = user$.get();
+  const router = useRouter();
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!user) {
+      router.replace("/");
+    }
+  }, [user]);
+
+  if (!user) return null;
+
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Legend-State Example</Text>
       <NewTodo />
       <Todos todos$={_todos$} />
       <ClearTodos />
+      <Button title="Sign Out" onPress={() => signOut()} />
     </View>
   );
 });
