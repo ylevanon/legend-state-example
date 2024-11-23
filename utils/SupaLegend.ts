@@ -8,9 +8,16 @@ import { configureSynced } from '@legendapp/state/sync';
 import { observablePersistAsyncStorage } from '@legendapp/state/persist-plugins/async-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const supabase = createClient<Database>(
+export const supabase = createClient<Database>(
   process.env.EXPO_PUBLIC_SUPABASE_URL,
-  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,{
+    auth: {
+      storage: AsyncStorage,
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: false,
+    },
+  }
 );
 
 // Provide a function to generate ids locally
@@ -33,31 +40,44 @@ const customSynced = configureSynced(syncedSupabase, {
   fieldDeleted: 'deleted',
 });
 
+// Add a helper to get the current user's ID
+export const getCurrentUserId = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  return user?.id;
+};
+
 export const todos$ = observable(
   customSynced({
     supabase,
     collection: 'todos',
     select: (from) =>
-      from.select('id,counter,text,done,created_at,updated_at,deleted'),
+      from
+        .select('id,counter,text,done,created_at,updated_at,deleted,user_id')
+        .eq('user_id', await getCurrentUserId()),  // Filter by current user
     actions: ['read', 'create', 'update', 'delete'],
     realtime: true,
-    // Persist data and pending changes locally
     persist: {
       name: 'todos',
-      retrySync: true, // Persist pending changes and retry
+      retrySync: true,
     },
     retry: {
-      infinite: true, // Retry changes with exponential backoff
+      infinite: true,
     },
   })
 );
 
-export function addTodo(text: string) {
+export async function addTodo(text: string) {
+  const userId = await getCurrentUserId();
+  if (!userId) return; // Don't create todo if user isn't authenticated
+
   const id = generateId();
-  // Add keyed by id to the todos$ observable to trigger a create in Supabase
   todos$[id].assign({
     id,
     text,
+    user_id: userId, // Include the user_id when creating a todo
+    done: false,
+    counter: 0,
+    deleted: false,
   });
 }
 

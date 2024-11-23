@@ -1,15 +1,16 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   FlatList,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-} from 'react-native';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { observer } from '@legendapp/state/react';
-import { addTodo, todos$ as _todos$, toggleDone } from './utils/SupaLegend';
-import { Tables } from './utils/database.types';
+  View,
+} from "react-native";
+
+import { observer } from "@legendapp/state/react";
+import { addTodo, todos$ as _todos$, toggleDone } from "@/utils/SupaLegend";
+import { Tables } from "@/utils/database.types";
 
 // Emojis to decorate each todo.
 const NOT_DONE_ICON = String.fromCodePoint(0x1f7e0);
@@ -17,9 +18,9 @@ const DONE_ICON = String.fromCodePoint(0x2705);
 
 // The text input component to add a new todo.
 const NewTodo = () => {
-  const [text, setText] = useState('');
+  const [text, setText] = useState("");
   const handleSubmitEditing = ({ nativeEvent: { text } }) => {
-    setText('');
+    setText("");
     addTodo(text);
   };
   return (
@@ -34,7 +35,7 @@ const NewTodo = () => {
 };
 
 // A single todo component, either 'not done' or 'done': press to toggle.
-const Todo = ({ todo }: { todo: Tables<'todos'> }) => {
+const Todo = ({ todo }: { todo: Tables<"todos"> }) => {
   const handlePress = () => {
     toggleDone(todo.id);
   };
@@ -55,7 +56,7 @@ const Todo = ({ todo }: { todo: Tables<'todos'> }) => {
 const Todos = observer(({ todos$ }: { todos$: typeof _todos$ }) => {
   // Get the todos from the state and subscribe to updates
   const todos = todos$.get();
-  const renderItem = ({ item: todo }: { item: Tables<'todos'> }) => (
+  const renderItem = ({ item: todo }: { item: Tables<"todos"> }) => (
     <Todo todo={todo} />
   );
   if (todos)
@@ -73,7 +74,7 @@ const Todos = observer(({ todos$ }: { todos$: typeof _todos$ }) => {
 // A button component to delete all the todos, only shows when there are some.
 const ClearTodos = () => {
   const handlePress = () => {
-    console.log('delete');
+    console.log("delete");
   };
   return [].length ? (
     <TouchableOpacity onPress={handlePress}>
@@ -82,34 +83,31 @@ const ClearTodos = () => {
   ) : null;
 };
 
-// The main app.
-const App = observer(() => {
+const TodoPage = observer(() => {
   return (
-    <SafeAreaProvider>
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.heading}>Legend-State Example</Text>
-        <NewTodo />
-        <Todos todos$={_todos$} />
-        <ClearTodos />
-      </SafeAreaView>
-    </SafeAreaProvider>
+    <View style={styles.container}>
+      <Text style={styles.heading}>Legend-State Example</Text>
+      <NewTodo />
+      <Todos todos$={_todos$} />
+      <ClearTodos />
+    </View>
   );
 });
 
 // Styles for the app.
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     flex: 1,
     margin: 16,
   },
   heading: {
     fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
   },
   input: {
-    borderColor: '#999',
+    borderColor: "#999",
     borderRadius: 8,
     borderWidth: 2,
     flex: 0,
@@ -126,10 +124,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 16,
     padding: 16,
-    backgroundColor: '#ffd',
+    backgroundColor: "#ffd",
   },
   done: {
-    backgroundColor: '#dfd',
+    backgroundColor: "#dfd",
   },
   todoText: {
     fontSize: 20,
@@ -137,9 +135,9 @@ const styles = StyleSheet.create({
   clearTodos: {
     margin: 16,
     flex: 0,
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 16,
   },
 });
 
-export default App;
+export default TodoPage;

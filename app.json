@@ -1,4 +1,13 @@
 {
   "name": "legend-state-example",
-  "slug": "legend-state-example"
+  "slug": "legend-state-example",
+  "expo": {
+    "scheme": "legendstateexample",
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router"
+    ]
+  }
 }
