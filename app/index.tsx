@@ -1,5 +1,4 @@
-import { signInWithEmail, signUpWithEmail } from "@/utils/Auth";
-import { supabase } from "@/utils/SupaLegend";
+import { useAuth } from "@/provider/AuthProvider";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { Alert, StyleSheet, View } from "react-native";
@@ -9,7 +8,7 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const { signInWithEmail, signUpWithEmail } = useAuth();
   //   async function signInWithEmail() {
   //     setLoading(true);
   //     const { error } = await supabase.auth.signInWithPassword({

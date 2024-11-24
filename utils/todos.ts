@@ -1,5 +1,4 @@
 import { observable } from "@legendapp/state";
-import { user$ } from "./Auth";
 import { customSynced, generateId, supabase } from "./SupaLegend";
 
 export const todos$ = observable(

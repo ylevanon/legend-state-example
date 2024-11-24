@@ -11,7 +11,7 @@ import {
 
 import { observer } from "@legendapp/state/react";
 import { addTodo, todos$ as _todos$, toggleDone } from "@/utils/todos";
-import { signOut, user$ } from "@/utils/Auth";
+import { useAuth } from "@/provider/AuthProvider";
 import { Tables } from "@/utils/database.types";
 import { useRouter } from "expo-router";
 
@@ -87,7 +87,7 @@ const ClearTodos = () => {
 };
 
 const TodoPage = observer(() => {
-  const user = user$.get();
+  const { user, signOut } = useAuth();
   const router = useRouter();
 
   // Redirect to login if not authenticated
