@@ -7,8 +7,10 @@ import {
   useState,
 } from "react";
 import { AppState } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { supabase } from "@/utils/SupaLegend";
+import { todos$ } from "@/utils/todos"; // Import your todos observable
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -72,11 +74,35 @@ export default function AuthProvider({ children }: PropsWithChildren) {
   }, []);
 
   const signInWithEmail = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error };
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (!error) {
+        // Trigger a refresh of the todos after successful login
+        const { data: todos } = await supabase
+          .from("todos")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (todos) {
+          // Convert array to object with ID as key
+          const todosObject = todos.reduce((acc, todo) => {
+            acc[todo.id] = todo;
+            return acc;
+          }, {});
+
+          todos$.set(todosObject);
+        }
+      }
+
+      return { error };
+    } catch (error) {
+      console.error("Error in signInWithEmail:", error);
+      return { error: error as Error };
+    }
   };
 
   const signUpWithEmail = async (email: string, password: string) => {
@@ -89,9 +115,12 @@ export default function AuthProvider({ children }: PropsWithChildren) {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
 
-      // Explicitly clear the session
+      // Clear the session
       setSession(null);
       setIsLoading(false);
+
+      // Only reset the observable state, don't clear AsyncStorage
+      todos$.set({});
 
       return { error: null };
     } catch (error) {
