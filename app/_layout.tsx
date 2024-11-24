@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import { SafeAreaView, useColorScheme } from "react-native";
+import { AppState, SafeAreaView, useColorScheme } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StyleSheet } from "react-native";
 
