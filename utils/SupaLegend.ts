@@ -58,10 +58,10 @@ export const supabase = createClient<Database>(
 // });
 
 // Provide a function to generate ids locally
-const generateId = () => uuidv4();
+export const generateId = () => uuidv4();
 
 // Create a configured sync function
-const customSynced = configureSynced(syncedSupabase, {
+export const customSynced = configureSynced(syncedSupabase, {
   // Use React Native Async Storage
   persist: {
     plugin: observablePersistAsyncStorage({
@@ -77,44 +77,3 @@ const customSynced = configureSynced(syncedSupabase, {
   fieldDeleted: 'deleted',
 });
 
-export const todos$ = observable(
-  customSynced({
-    supabase,
-    collection: 'todos',
-    select: (from) =>
-      from
-        .select('id,counter,text,done,created_at,updated_at,deleted,user_id')
-        .eq('user_id', user$.get()?.id), // Filter todos by current user
-    actions: ['read', 'create', 'update', 'delete'],
-    realtime: true,
-    persist: {
-      name: 'todos',
-      retrySync: true,
-    },
-    retry: {
-      infinite: true,
-    },
-  })
-);
-
-export function addTodo(text: string) {
-  const userId = user$.get()?.id;
-  if (!userId) return; // Don't create todo if not authenticated
-
-  const id = generateId();
-  todos$[id].assign({
-    id,
-    text,
-    user_id: userId,
-    done: false,
-    deleted: false,
-    counter: 0,
-  });
-}
-
-export function toggleDone(id: string) {
-  const userId = user$.get()?.id;
-  if (!userId) return; // Don't toggle if not authenticated
-
-  todos$[id].done.set((prev) => !prev);
-}

@@ -10,7 +10,7 @@ import {
 } from "react-native";
 
 import { observer } from "@legendapp/state/react";
-import { addTodo, todos$ as _todos$, toggleDone } from "@/utils/SupaLegend";
+import { addTodo, todos$ as _todos$, toggleDone } from "@/utils/todos";
 import { signOut, user$ } from "@/utils/Auth";
 import { Tables } from "@/utils/database.types";
 import { useRouter } from "expo-router";
