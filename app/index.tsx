@@ -1,4 +1,4 @@
-import { signInWithEmail, signUpWithEmail } from "@/utils/SupaLegend";
+import { signInWithEmail, signUpWithEmail } from "@/utils/Auth";
 import { supabase } from "@/utils/SupaLegend";
 import { router } from "expo-router";
 import React, { useState } from "react";

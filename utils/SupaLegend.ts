@@ -20,42 +20,42 @@ export const supabase = createClient<Database>(
   }
 );
 
-export const session$ = observable<any>(null);
-export const user$ = observable<any>(null);
+// export const session$ = observable<any>(null);
+// export const user$ = observable<any>(null);
 
-supabase.auth.getSession().then(({ data: { session } }) => {
-  session$.set(session);
-  user$.set(session?.user ?? null);
-});
+// supabase.auth.getSession().then(({ data: { session } }) => {
+//   session$.set(session);
+//   user$.set(session?.user ?? null);
+// });
 
-// Auth functions
-export const signInWithEmail = async (email: string, password: string) => {
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-  return { error };
-};
+// // Auth functions
+// export const signInWithEmail = async (email: string, password: string) => {
+//   const { error } = await supabase.auth.signInWithPassword({
+//     email,
+//     password,
+//   });
+//   return { error };
+// };
 
-export const signUpWithEmail = async (email: string, password: string) => {
-  const { data: { session }, error } = await supabase.auth.signUp({
-    email,
-    password,
-  });
-  return { session, error };
-};
+// export const signUpWithEmail = async (email: string, password: string) => {
+//   const { data: { session }, error } = await supabase.auth.signUp({
+//     email,
+//     password,
+//   });
+//   return { session, error };
+// };
 
-export const signOut = async () => {
-  const { error } = await supabase.auth.signOut();
-  return { error };
-};
+// export const signOut = async () => {
+//   const { error } = await supabase.auth.signOut();
+//   return { error };
+// };
 
 
-// Auth state change handler
-supabase.auth.onAuthStateChange((_event, session) => {
-  session$.set(session);
-  user$.set(session?.user ?? null);
-});
+// // Auth state change handler
+// supabase.auth.onAuthStateChange((_event, session) => {
+//   session$.set(session);
+//   user$.set(session?.user ?? null);
+// });
 
 // Provide a function to generate ids locally
 const generateId = () => uuidv4();
